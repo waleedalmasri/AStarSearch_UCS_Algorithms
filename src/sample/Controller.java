@@ -40,7 +40,7 @@ public class Controller implements Initializable {
     RadioButton AStar;
 
     // initialize required variable.
-    City[] palestineCities = new City[51]; //store all cities.
+    City[] palestineCities = new City[60]; //store all cities.
     City[] selectedCities = new City[2];   //store user input.
     //UNIFORM COST SEARCH Requirements.
     LinkedList<road>[] adjacencyList;
@@ -72,7 +72,7 @@ public class Controller implements Initializable {
         }
 
         //Read city file,parse it and fill the cities array
-        File cityFile = new File("Cities.txt");
+        File cityFile = new File("towns.txt");
         BufferedReader br = new BufferedReader(new FileReader(cityFile));
         String line;
         int counter = 0;
@@ -93,7 +93,7 @@ public class Controller implements Initializable {
             counter++;
         }
 
-        File adjFile = new File("adj.txt");
+        File adjFile = new File("roads.txt");
         BufferedReader adjBr = new BufferedReader(new FileReader(adjFile));
         String adjLine;
 
