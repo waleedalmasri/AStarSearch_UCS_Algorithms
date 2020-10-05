@@ -10,7 +10,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,6 +31,10 @@ public class Controller implements Initializable {
     @FXML
     TextArea finalPath;
     @FXML
+    TextArea time;
+    @FXML
+    TextArea space;
+    @FXML
     RadioButton UCS;
     @FXML
     RadioButton AStar;
@@ -50,7 +53,7 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         try {
             goBtn.setDisable(shouldDisable);
-            ToggleGroup group=new ToggleGroup();
+            ToggleGroup group = new ToggleGroup();
             UCS.setToggleGroup(group);
             AStar.setToggleGroup(group);
             UCS.setSelected(true);
@@ -137,24 +140,32 @@ public class Controller implements Initializable {
         visited.clear();
         source.setCost(0.0);
         pq.add(source);
+        int time=0;
+        int fringeSize=pq.size();
 
         while (!pq.isEmpty()) {
-
             City newMin = pq.remove();
             double minCost = newMin.getCost();
             visited.add(newMin);
+
+            time++;
             if (newMin.getCityName().equals(goal.getCityName())) {
-                printUniformCostSearchPath(newMin, source);
+                printUniformCostSearchPath(newMin, source,time,fringeSize);
+
                 return;
             }
             for (int i = 0; i < adjacencyList[newMin.getId()].size(); i++) {
                 City adj = adjacencyList[newMin.getId()].get(i).c;
                 adj.setCost(adjacencyList[newMin.getId()].get(i).distance + minCost);
 
+                time++;
                 if (!visited.contains(adj)) {
                     pq.add(adj);
                     adj.predecessor = newMin;
+                    fringeSize=Integer.max(fringeSize,pq.size());
                 }
+
+
             }
         }
     }
@@ -166,12 +177,16 @@ public class Controller implements Initializable {
         source.setfN(0.0 + this.heuristicValueCalculator(source, goal));
         source.setgN(0.0);
         pq.add(source);
+        int time=0;
+        int fringeSize=pq.size();
+
         while (!pq.isEmpty()) {
             City newMin = pq.remove();
             visited.add(newMin);
 
+            time++;
             if (newMin.getCityName().equals(goal.getCityName())) {
-                this.printAStartSearchPath(newMin, source);
+                this.printAStartSearchPath(newMin, source,time,fringeSize);
                 return;
             }
             for (int i = 0; i < adjacencyList[newMin.getId()].size(); i++) {
@@ -183,9 +198,12 @@ public class Controller implements Initializable {
                 adj.setfN(fN);
                 adj.setgN(gN);
                 adj.sethN(hN);
+
+                time++;
                 if (!visited.contains(adj)) {
                     pq.add(adj);
                     adj.predecessor = newMin;
+                    fringeSize=Integer.max(fringeSize,pq.size());
                 }
             }
         }
@@ -201,10 +219,12 @@ public class Controller implements Initializable {
         return straightDistance / 5;
     }
 
-    public void printAStartSearchPath(City goal, City source) {
+    public void printAStartSearchPath(City goal, City source,int timeValue,int spaceValue) {
         double cost = Math.round(goal.getgN() * 100.0) / 100.0;
         finalPath.appendText("COST ==> " + cost + " KM\n");
         finalPath.appendText("--------------------------\n");
+        this.time.setText(String.valueOf(timeValue) + " Comparison Statement");
+        this.space.setText(String.valueOf(spaceValue) + " Max FRINGE Size");
 
         LinkedList<City> path = new LinkedList<City>();
         path.add(goal);
@@ -237,10 +257,13 @@ public class Controller implements Initializable {
     }
 
     // UI Handling Method's.
-    public void printUniformCostSearchPath(City goal, City source) {
+    public void printUniformCostSearchPath(City goal, City source,int timeValue,int spaceValue) {
         double cost = Math.round(goal.getCost() * 100.0) / 100.0;
         finalPath.appendText("COST ==> " + cost + " KM\n");
         finalPath.appendText("--------------------------\n");
+        this.time.setText(String.valueOf(timeValue) + " Comparison Statement");
+        this.space.setText(String.valueOf(spaceValue) + " Max FRINGE Size");
+
         LinkedList<City> path = new LinkedList<City>();
         path.add(goal);
         while (!goal.getCityName().equals(source.getCityName())) {
@@ -271,6 +294,8 @@ public class Controller implements Initializable {
     }
 
     public void pathAlgorithmRequested() {
+        time.setText("");
+        space.setText("");
         finalPath.setText("");
         for (int i = 0; i < 51; i++) {
             palestineCities[i].setCost(Double.POSITIVE_INFINITY);
@@ -288,10 +313,12 @@ public class Controller implements Initializable {
         if (UCS.isSelected())
             this.uniformCostSearch(selectedCities[0], selectedCities[1]);
         else if (AStar.isSelected())
-            AStartSearch(selectedCities[0],selectedCities[1]);
+            AStartSearch(selectedCities[0], selectedCities[1]);
     }
 
     public void clear() {
+        time.setText("");
+        space.setText("");
         finalPath.setText("");
         sourceCity.setValue(null);
         destinationCity.setValue(null);
